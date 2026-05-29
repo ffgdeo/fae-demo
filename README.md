@@ -1,7 +1,6 @@
 # FAE Demo — Hands-on Databricks Free Edition 🧞
 
-Atividade prática para estudantes na
-[Databricks Free Edition](https://www.databricks.com/learn/free-edition), usando o
+Atividade prática para estudantes na **Databricks Free Edition**, usando o
 **Genie Code** (o copiloto de código dentro do notebook) para escrever o código com você.
 
 São duas trilhas principais + uma opcional:
