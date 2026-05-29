@@ -9,7 +9,7 @@ de uma universidade brasileira (alunos, matrículas, notas, disciplinas e provas
 
 ## 🚀 Como começar
 
-1. Crie uma conta gratuita em **[databricks.com/learn/free-edition](https://www.databricks.com/learn/free-edition)**.
+1. Crie uma conta gratuita em **[https://www.databricks.com/learn/free-edition](https://login.databricks.com/?intent=FAE_visit)**.
 2. No workspace: menu lateral → **Workspace** → **Repos / Git folder** → **Add** →
    cole a URL deste repositório:
    ```
