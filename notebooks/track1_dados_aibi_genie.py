@@ -137,8 +137,11 @@ def bronze_matriculas():
 # MAGIC > _"Crie a materialized view `gold_desempenho_aluno`: por aluno e semestre, média do semestre,
 # MAGIC > nº de aprovações/reprovações e o CRA acumulado (média móvel com Window)."_
 # MAGIC
-# MAGIC > _"Crie a materialized view `gold_alunos_em_risco` para o semestre 2026/1: para cada aluno
-# MAGIC > ativo, um `score_risco` (0-100) e um `nivel_risco` ALTO/MEDIO/BAIXO."_
+# MAGIC > _"Crie a materialized view `gold_desempenho_departamento`: por departamento e semestre, total
+# MAGIC > de matrículas, taxa de aprovação (%) e nota média."_
+# MAGIC
+# MAGIC > 💡 Previsão de alunos em risco é **Machine Learning** — fica na Trilha 2. Aqui no Data
+# MAGIC > Engineering ficamos nas agregações analíticas (sem modelos).
 
 # COMMAND ----------
 
@@ -163,7 +166,7 @@ def bronze_matriculas():
 # MAGIC 2. Em **Data**, adicione suas tabelas `gold_*`.
 # MAGIC 3. Em **Canvas** → **Add a visualization**, descreva o gráfico em linguagem natural:
 # MAGIC    _"taxa de aprovação média por departamento"_, _"top 10 disciplinas com menor aprovação"_,
-# MAGIC    _"distribuição de alunos por nível de risco"_. O AI/BI gera a query e o gráfico.
+# MAGIC    _"evolução da nota média por semestre"_. O AI/BI gera a query e o gráfico.
 
 # COMMAND ----------
 
@@ -172,7 +175,7 @@ def bronze_matriculas():
 # MAGIC 1. Menu lateral → **Genie** → **New** → selecione suas tabelas `gold_*` (e `silver_matriculas`).
 # MAGIC 2. Pergunte em português:
 # MAGIC    - _"Qual curso tem a maior taxa de reprovação?"_
-# MAGIC    - _"Quantos alunos estão em risco ALTO no semestre 2026/1?"_
+# MAGIC    - _"Qual departamento tem a melhor taxa de aprovação?"_
 # MAGIC    - _"Mostre a evolução da nota média de Cálculo 1 ao longo dos semestres."_
 # MAGIC 3. Se o Genie errar, adicione **Instructions** e **Example SQL** no Space para ensiná-lo.
 # MAGIC    **Esse loop de ensinar o Genie é o aprendizado-chave da trilha.**
