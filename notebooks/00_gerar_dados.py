@@ -3,11 +3,11 @@
 # MAGIC %md
 # MAGIC # 00 · Setup — Geração dos Dados (rode isto PRIMEIRO)
 # MAGIC
-# MAGIC Este é o **ponto de partida comum** das 3 trilhas. Ele cria um conjunto de
-# MAGIC dados sintéticos realistas de uma universidade brasileira:
+# MAGIC Este é o **ponto de partida comum** das 3 trilhas. Ele só faz uma coisa:
+# MAGIC **deixa dados brutos no Volume** (a "zona raw"). Nenhuma tabela é criada aqui —
+# MAGIC construir as tabelas é justamente o seu trabalho nas trilhas. 😉
 # MAGIC
-# MAGIC - **CSVs brutos** no Volume `staging/csvs/` → matéria-prima da Trilha 1 (Data Engineering)
-# MAGIC - **Tabelas Delta** de referência (`alunos`, `matriculas`, `disciplinas`, ...) → usadas pela Trilha 2 (ML) e pelo Genie
+# MAGIC - **CSVs brutos** no Volume `staging/csvs/` → matéria-prima das Trilhas 1 (Data Engineering) e 2 (ML)
 # MAGIC - **PDFs de provas** no Volume `staging/exams/` → matéria-prima da Trilha 3 (RAG)
 # MAGIC
 # MAGIC > **Rode todas as células** (`Run all`). Leva ~3-5 min em compute serverless.
@@ -277,61 +277,6 @@ print("CSVs gravados no Volume.")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Tabelas de referencia (Delta) — usadas diretamente pelo pipeline
-
-# COMMAND ----------
-
-# Departamentos, cursos e professores sao tabelas de referencia pequenas.
-# O pipeline le essas via spark.table() (external), entao precisam existir como Delta.
-
-spark.createDataFrame(departamentos, ["departamento_id","sigla","nome"]) \
-    .write.mode("overwrite").saveAsTable("departamentos")
-
-spark.createDataFrame(cursos, ["curso_id","sigla","nome","departamento_id","duracao_semestres"]) \
-    .write.mode("overwrite").saveAsTable("cursos")
-
-spark.createDataFrame(professores, ["professor_id","nome","departamento_id","titulacao"]) \
-    .write.mode("overwrite").saveAsTable("professores")
-
-# Disciplinas tambem e referencia usada no ML notebook e Genie
-df_disc = spark.createDataFrame(disciplinas,
-    ["disciplina_id","codigo","nome","departamento_id","creditos","semestre_recomendado","dificuldade"])
-df_disc.write.mode("overwrite").saveAsTable("disciplinas")
-
-# Grade curricular (referencia)
-spark.createDataFrame(gc_rows, ["curso_id","disciplina_id"]).write.mode("overwrite").saveAsTable("grade_curricular")
-
-# Alunos e matriculas tambem como Delta para consultas diretas (ML, Genie)
-spark.createDataFrame(alunos, ["aluno_id","nome","curso_id","ano_ingresso","status"]) \
-    .write.mode("overwrite").saveAsTable("alunos")
-
-schema_m = StructType([StructField("matricula_id",IntegerType()),StructField("aluno_id",IntegerType()),
-    StructField("disciplina_id",IntegerType()),StructField("professor_id",IntegerType()),
-    StructField("semestre",StringType()),StructField("nota_p1",FloatType()),
-    StructField("nota_p2",FloatType()),StructField("nota_final",FloatType()),
-    StructField("frequencia_pct",FloatType()),StructField("situacao",StringType())])
-spark.createDataFrame(matriculas, schema=schema_m).write.mode("overwrite").saveAsTable("matriculas")
-
-print("Tabelas Delta de referencia criadas.")
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Table comments (para Genie)
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC COMMENT ON TABLE departamentos IS 'Departamentos academicos da universidade (ex: Computacao, Matematica, Fisica)';
-# MAGIC COMMENT ON TABLE cursos IS 'Programas de graduacao. Cada curso pertence a um departamento.';
-# MAGIC COMMENT ON TABLE disciplinas IS 'Catalogo de disciplinas com codigo, nome, creditos, semestre recomendado e fator de dificuldade (0-1).';
-# MAGIC COMMENT ON TABLE professores IS 'Corpo docente com nome, departamento e titulacao.';
-# MAGIC COMMENT ON TABLE alunos IS 'Estudantes matriculados. Status: ativo, formado ou trancado.';
-# MAGIC COMMENT ON TABLE matriculas IS 'Registro de matriculas com notas P1, P2, nota final (media), frequencia e situacao. Escala 0-10, aprovacao requer nota >= 6.0 e frequencia >= 75%.';
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC ## Upload de PDFs de provas
 
 # COMMAND ----------
@@ -366,14 +311,21 @@ print(f"\n{uploaded} PDFs uploaded to {volume_target}")
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC SELECT 'departamentos' as t, COUNT(*) as n FROM departamentos
-# MAGIC UNION ALL SELECT 'cursos', COUNT(*) FROM cursos
-# MAGIC UNION ALL SELECT 'disciplinas', COUNT(*) FROM disciplinas
-# MAGIC UNION ALL SELECT 'professores', COUNT(*) FROM professores
-# MAGIC UNION ALL SELECT 'alunos', COUNT(*) FROM alunos
-# MAGIC UNION ALL SELECT 'matriculas', COUNT(*) FROM matriculas
+# MAGIC %md
+# MAGIC ## Confira a zona raw
+# MAGIC Os dados brutos estão no Volume. Nenhuma tabela foi criada — isso é com você nas trilhas.
 
 # COMMAND ----------
 
-print("Dados gerados com sucesso!")
+print("CSVs disponíveis:")
+display(dbutils.fs.ls(CSV_BASE))
+
+print("Amostra do CSV de matrículas (matéria-prima das Trilhas 1 e 2):")
+display(
+    spark.read.option("header", True).option("inferSchema", True)
+    .csv(f"{CSV_BASE}/matriculas").limit(5)
+)
+
+# COMMAND ----------
+
+print("✅ Zona raw pronta! Abra a trilha que você escolheu.")

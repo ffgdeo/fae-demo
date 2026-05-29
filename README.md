@@ -20,7 +20,7 @@ de uma universidade brasileira (alunos, matrículas, notas, disciplinas e provas
 
 | Trilha | Notebook | O que você constrói |
 |---|---|---|
-| 1 · Data Engineering + AI/BI + Genie | `notebooks/track1_dados_aibi_genie` | Pipeline Bronze→Silver→Gold, dashboard e Genie |
+| 1 · Data Engineering + AI/BI + Genie | `notebooks/track1_dados_aibi_genie` | Pipeline declarativo (streaming tables + materialized views) Bronze→Silver→Gold, dashboard e Genie |
 | 2 · Machine Learning Clássico | `notebooks/track2_ml_classico` | Modelo de predição de reprovação com MLflow |
 | 3 · RAG | `notebooks/track3_rag` | Assistente de Q&A sobre provas (busca + LLM) |
 

@@ -23,12 +23,23 @@ print(f"Usando {CATALOG}.{SCHEMA}")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 0 · Conheça os dados
-# MAGIC A tabela `matriculas` tem uma linha por (aluno, disciplina) com notas, frequência e `situacao`.
+# MAGIC ## 0 · Ingestão — carregue os dados brutos
+# MAGIC O `00_gerar_dados` deixou os CSVs no Volume (zona raw). Aqui carregamos `matriculas` num
+# MAGIC DataFrame e registramos uma view temporária para usar SQL.
+# MAGIC
+# MAGIC > 💡 Na Trilha 1 isso vira um pipeline declarativo com tabelas governadas. Aqui, como o
+# MAGIC > foco é ML, fazemos um load direto da zona raw.
 
 # COMMAND ----------
 
-display(spark.table("matriculas").limit(10))
+CSV_BASE = f"/Volumes/{CATALOG}/{SCHEMA}/staging/csvs"
+
+matriculas = (
+    spark.read.option("header", True).option("inferSchema", True)
+    .csv(f"{CSV_BASE}/matriculas")
+)
+matriculas.createOrReplaceTempView("matriculas")
+display(matriculas.limit(10))
 
 # COMMAND ----------
 

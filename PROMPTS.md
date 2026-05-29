@@ -25,11 +25,14 @@ decora sintaxe — você aprende a pedir bem.** Esta é a habilidade que leva pr
 
 ## Prompts de partida por trilha
 
-### Trilha 1 — Data Engineering + AI/BI + Genie
-- _"Seguindo o padrão da célula `bronze_matriculas`, crie as tabelas Bronze para alunos, disciplinas, cursos, departamentos e professores."_
-- _"Crie `silver_matriculas` juntando todas as Bronze, com nomes legíveis e colunas `aprovado`/`reprovado`."_
-- _"Crie `gold_desempenho_disciplina` com taxa de aprovação e nota média por disciplina e semestre."_
+### Trilha 1 — Data Engineering + AI/BI + Genie (pipeline declarativo)
+- _"Seguindo o padrão da `@dp.table` `bronze_matriculas` (streaming table via Auto Loader), crie as streaming tables Bronze para alunos, disciplinas, cursos, departamentos e professores."_
+- _"Crie a materialized view `silver_matriculas` juntando todas as Bronze, com nomes legíveis, colunas `aprovado`/`reprovado` e expectativas `@dp.expect`."_
+- _"Crie a materialized view `gold_desempenho_disciplina` com taxa de aprovação e nota média por disciplina e semestre."_
 - No **Genie**: _"Qual curso tem a maior taxa de reprovação?"_ → se errar, ensine com Instructions + Example SQL.
+
+> ⚠️ A Trilha 1 é a **definição** de um pipeline. Você não roda célula a célula — cria um
+> **Pipeline** apontando pro notebook e roda por lá (passo a passo no fim do notebook).
 
 ### Trilha 2 — Machine Learning
 - _"Crie atributos por aluno: CRA, total de disciplinas, reprovações anteriores e taxa de aprovação."_

@@ -2,120 +2,104 @@
 
 # MAGIC %md
 # MAGIC # Trilha 1 · Data Engineering + AI/BI + Genie
+# MAGIC ## (com **Lakeflow Spark Declarative Pipelines**)
 # MAGIC
 # MAGIC **Objetivo:** transformar os CSVs brutos da universidade em tabelas confiáveis
-# MAGIC (arquitetura **Medalhão**: Bronze → Silver → Gold), construir um **dashboard AI/BI**
-# MAGIC e um **Genie Space** para perguntar aos dados em português.
+# MAGIC (arquitetura **Medalhão**: Bronze → Silver → Gold) usando um **pipeline declarativo**,
+# MAGIC e depois construir um **dashboard AI/BI** e um **Genie Space**.
 # MAGIC
-# MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` antes deste.
+# MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` antes (ele deixa os CSVs no Volume).
 # MAGIC
-# MAGIC Este notebook te dá um **exemplo funcional de Bronze** para você copiar o padrão.
-# MAGIC O resto (Silver, Gold, dashboard, Genie) você constrói com o **Databricks Assistant** —
-# MAGIC os prompts sugeridos estão nas células marcadas com 🧞 **SUA VEZ**.
+# MAGIC ### ⚠️ Este notebook é a *definição* de um pipeline — você NÃO roda célula a célula aqui!
+# MAGIC No modelo declarativo, você **descreve as tabelas** (com `@dp.table`) e o Databricks
+# MAGIC descobre a ordem, as dependências e a execução incremental por você. O fluxo é:
+# MAGIC
+# MAGIC 1. Edite/complete as definições neste notebook (com ajuda do **Databricks Assistant**).
+# MAGIC 2. Crie um **Pipeline** apontando para este notebook (passo a passo na última célula).
+# MAGIC 3. Rode o pipeline e veja o grafo Bronze → Silver → Gold se materializar.
+# MAGIC
+# MAGIC > 🎛️ O **catálogo** e o **schema** de destino são escolhidos nas *configurações do pipeline*
+# MAGIC > (não em widgets). O caminho dos CSVs vem de uma config `fae.csv_base` — se você usou o
+# MAGIC > schema padrão no `00_gerar_dados`, o default abaixo já funciona.
 
 # COMMAND ----------
 
-dbutils.widgets.text("catalog", "workspace", "Catalog")
-dbutils.widgets.text("schema", "sistema_academico", "Schema")
-CATALOG = dbutils.widgets.get("catalog")
-SCHEMA  = dbutils.widgets.get("schema")
-CSV_BASE = f"/Volumes/{CATALOG}/{SCHEMA}/staging/csvs"
-spark.sql(f"USE {CATALOG}.{SCHEMA}")
-print(f"Usando {CATALOG}.{SCHEMA}")
+from pyspark import pipelines as dp
+from pyspark.sql import functions as F
+from pyspark.sql.window import Window
 
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## 0 · Confira a matéria-prima
-# MAGIC Os CSVs brutos já estão no Volume. Vamos olhar de onde os dados vêm.
-
-# COMMAND ----------
-
-display(dbutils.fs.ls(CSV_BASE))
-
-# COMMAND ----------
-
-# Espie o CSV bruto de matrículas — é a tabela "transacional" principal
-display(
-    spark.read.option("header", True).option("inferSchema", True)
-    .csv(f"{CSV_BASE}/matriculas")
-    .limit(10)
-)
+# Caminho da zona raw. Default = schema padrão do 00_gerar_dados.
+# Se você usou outro catálogo/schema, adicione nas configs do pipeline:
+#   fae.csv_base = /Volumes/<seu_catalogo>/<seu_schema>/staging/csvs
+CSV_BASE = spark.conf.get("fae.csv_base", "/Volumes/workspace/sistema_academico/staging/csvs")
+SCHEMA_BASE = CSV_BASE.rsplit("/csvs", 1)[0] + "/_schemas"
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 1 · Bronze (EXEMPLO FUNCIONAL) — copie este padrão
-# MAGIC Bronze = cópia fiel do dado bruto, só ingerido para dentro de uma tabela Delta governada.
-# MAGIC Aqui usamos `read_files` (Auto Loader em modo batch) — a forma moderna de ingerir arquivos no Databricks.
-
-# COMMAND ----------
-
-(
-    spark.read.format("csv")
-    .option("header", True).option("inferSchema", True)
-    .load(f"{CSV_BASE}/matriculas")
-    .write.mode("overwrite").saveAsTable("bronze_matriculas")
-)
-print("✅ bronze_matriculas criada")
-display(spark.table("bronze_matriculas").limit(5))
+# MAGIC ## Dois tipos de tabela no pipeline declarativo
+# MAGIC - **Streaming Table** (tabela de streaming): para **ingestão incremental**. A consulta lê de
+# MAGIC   uma fonte com `spark.readStream` (ex.: Auto Loader). Processa só o que é novo a cada run.
+# MAGIC   → **Use no Bronze.**
+# MAGIC - **Materialized View** (visão materializada): resultado de uma consulta **batch** sobre
+# MAGIC   outras tabelas; o Databricks recalcula de forma eficiente quando os dados mudam.
+# MAGIC   → **Use no Silver e no Gold.**
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 2 · 🧞 SUA VEZ — crie as outras tabelas Bronze
+# MAGIC ## 1 · Bronze = Streaming Table (EXEMPLO FUNCIONAL) — copie este padrão
+# MAGIC Ingestão com **Auto Loader** (`cloudFiles`) via `spark.readStream`. Por ser uma consulta de
+# MAGIC streaming, o `@dp.table` materializa isto como uma **streaming table** (ingestão incremental).
+
+# COMMAND ----------
+
+@dp.table(name="bronze_matriculas", comment="Matrículas brutas ingeridas via Auto Loader.")
+def bronze_matriculas():
+    return (
+        spark.readStream.format("cloudFiles")
+        .option("cloudFiles.format", "csv")
+        .option("cloudFiles.schemaLocation", f"{SCHEMA_BASE}/bronze_matriculas")
+        .option("header", True)
+        .option("inferSchema", True)
+        .load(f"{CSV_BASE}/matriculas")
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2 · 🧞 SUA VEZ — as outras tabelas Bronze
 # MAGIC Faltam: `bronze_alunos`, `bronze_disciplinas`, `bronze_cursos`,
-# MAGIC `bronze_departamentos`, `bronze_professores`.
+# MAGIC `bronze_departamentos`, `bronze_professores` (os CSVs têm esses mesmos nomes).
 # MAGIC
-# MAGIC **Abra o Databricks Assistant** (ícone ✨ ou `Cmd/Ctrl + I`) e peça, por exemplo:
+# MAGIC **Prompt para o Assistant** (✨ ou `Cmd/Ctrl + I`):
 # MAGIC
-# MAGIC > _"Seguindo exatamente o mesmo padrão da célula que cria `bronze_matriculas` a partir de
-# MAGIC > `{CSV_BASE}/matriculas`, gere uma célula para cada um destes CSVs criando as tabelas Bronze
-# MAGIC > correspondentes: alunos, disciplinas, cursos, departamentos, professores."_
-# MAGIC
-# MAGIC 💡 Dica: escreva o código numa célula vazia abaixo e use o Assistant para completar/ajustar.
+# MAGIC > _"Seguindo exatamente o mesmo padrão da função `bronze_matriculas` (decorator `@dp.table`,
+# MAGIC > Auto Loader com cloudFiles lendo de `{CSV_BASE}/<nome>` e schemaLocation em
+# MAGIC > `{SCHEMA_BASE}/<nome>`), gere uma função `@dp.table` para cada um destes CSVs: alunos,
+# MAGIC > disciplinas, cursos, departamentos, professores."_
 
 # COMMAND ----------
 
-# 👇 cole/gere aqui o código das demais tabelas Bronze
-
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## 3 · 🧞 SUA VEZ — Silver (limpeza + junção)
-# MAGIC Silver = dados limpos e enriquecidos. Queremos uma tabela `silver_matriculas` que junte
-# MAGIC matrículas com nome do aluno, disciplina, curso, departamento e professor — e que valide
-# MAGIC as notas (0 a 10) e a frequência (0 a 100%).
-# MAGIC
-# MAGIC **Prompt sugerido para o Assistant:**
-# MAGIC
-# MAGIC > _"Crie uma tabela Delta `silver_matriculas` em PySpark juntando `bronze_matriculas` com
-# MAGIC > `bronze_alunos` (por aluno_id), `bronze_disciplinas` (por disciplina_id),
-# MAGIC > `bronze_cursos`, `bronze_departamentos` e `bronze_professores`. Inclua colunas legíveis
-# MAGIC > (aluno_nome, disciplina_nome, curso_nome, professor_nome) e duas colunas booleanas
-# MAGIC > `aprovado` e `reprovado` derivadas da coluna `situacao`. Descarte linhas com `situacao`
-# MAGIC > inválida e me explique cada transformação."_
-
-# COMMAND ----------
-
+# 👇 gere aqui as demais tabelas @dp.table de Bronze
 
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 4 · 🧞 SUA VEZ — Gold (tabelas de negócio)
-# MAGIC Gold = tabelas agregadas, prontas para dashboards e ML. Sugestões de prompts:
+# MAGIC ## 3 · 🧞 SUA VEZ — Silver = Materialized View (limpeza + junção + qualidade)
+# MAGIC Silver = dados limpos e enriquecidos, como uma **materialized view** (consulta batch sobre as
+# MAGIC tabelas Bronze). Aproveite as **expectativas de qualidade** (`@dp.expect`) para validar.
 # MAGIC
-# MAGIC > _"A partir de `silver_matriculas`, crie `gold_desempenho_disciplina`: por disciplina e
-# MAGIC > semestre, calcule total de alunos, taxa de aprovação (%), nota média, e frequência média."_
+# MAGIC **Prompt sugerido:**
 # MAGIC
-# MAGIC > _"Crie `gold_desempenho_aluno`: por aluno e semestre, média do semestre, nº de aprovações/
-# MAGIC > reprovações e o CRA acumulado (média móvel das médias por semestre)."_
-# MAGIC
-# MAGIC > _"Crie `gold_alunos_em_risco` para o semestre 2026/1: para cada aluno ativo, um
-# MAGIC > `score_risco` (0-100) baseado em nota média baixa, frequência baixa e histórico de
-# MAGIC > reprovações, e um `nivel_risco` ALTO/MEDIO/BAIXO."_
+# MAGIC > _"Crie uma **materialized view** `silver_matriculas` no pipeline declarativo que lê
+# MAGIC > `bronze_matriculas` (leitura batch) e junta com `bronze_alunos` (aluno_id),
+# MAGIC > `bronze_disciplinas` (disciplina_id), `bronze_cursos`, `bronze_departamentos` e
+# MAGIC > `bronze_professores`. Inclua nomes legíveis (aluno_nome, disciplina_nome, curso_nome,
+# MAGIC > professor_nome) e colunas booleanas `aprovado`/`reprovado` derivadas de `situacao`.
+# MAGIC > Adicione expectativas com `@dp.expect` para nota_p1, nota_p2 (0 a 10) e frequencia_pct
+# MAGIC > (0 a 100), e `@dp.expect_or_drop` para descartar situações inválidas."_
 
 # COMMAND ----------
 
@@ -124,30 +108,61 @@ display(spark.table("bronze_matriculas").limit(5))
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 5 · Dashboard AI/BI (na interface)
+# MAGIC ## 4 · 🧞 SUA VEZ — Gold = Materialized Views (tabelas de negócio)
+# MAGIC Gold = visões materializadas agregadas, prontas para dashboards/Genie. Sugestões de prompts:
+# MAGIC
+# MAGIC > _"Crie uma **materialized view** `gold_desempenho_disciplina`: a partir de `silver_matriculas`,
+# MAGIC > por disciplina e semestre, calcule total de alunos, taxa de aprovação (%), nota média e
+# MAGIC > frequência média."_
+# MAGIC
+# MAGIC > _"Crie a materialized view `gold_desempenho_aluno`: por aluno e semestre, média do semestre,
+# MAGIC > nº de aprovações/reprovações e o CRA acumulado (média móvel com Window)."_
+# MAGIC
+# MAGIC > _"Crie a materialized view `gold_alunos_em_risco` para o semestre 2026/1: para cada aluno
+# MAGIC > ativo, um `score_risco` (0-100) e um `nivel_risco` ALTO/MEDIO/BAIXO."_
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 5 · Crie e rode o Pipeline (na interface)
+# MAGIC 1. Menu lateral → **Jobs & Pipelines** → **Create** → **ETL Pipeline** (Spark Declarative Pipeline).
+# MAGIC 2. **Source code:** aponte para **este notebook** (`track1_dados_aibi_genie`).
+# MAGIC 3. **Destination:** escolha seu **Catalog** e **Target schema** (ex.: `workspace` / `sistema_academico`).
+# MAGIC 4. (Opcional) Se você usou um schema diferente no `00_gerar_dados`, em **Advanced → Configuration**
+# MAGIC    adicione `fae.csv_base = /Volumes/<seu_catalogo>/<seu_schema>/staging/csvs`.
+# MAGIC 5. Clique em **Create** e depois em **Start**. Acompanhe o **grafo** Bronze → Silver → Gold.
+# MAGIC 6. Quando terminar, suas tabelas estarão no catálogo/schema escolhido. 🎉
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 6 · Dashboard AI/BI (na interface)
 # MAGIC 1. Menu lateral → **Dashboards** → **Create dashboard**.
 # MAGIC 2. Em **Data**, adicione suas tabelas `gold_*`.
-# MAGIC 3. Em **Canvas**, clique em **Add a visualization** e descreva o gráfico em linguagem natural —
-# MAGIC    ex.: _"taxa de aprovação média por departamento"_, _"top 10 disciplinas com menor aprovação"_,
+# MAGIC 3. Em **Canvas** → **Add a visualization**, descreva o gráfico em linguagem natural:
+# MAGIC    _"taxa de aprovação média por departamento"_, _"top 10 disciplinas com menor aprovação"_,
 # MAGIC    _"distribuição de alunos por nível de risco"_. O AI/BI gera a query e o gráfico.
-# MAGIC 4. Monte 1 página com 3-4 visualizações que contem uma história.
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 6 · Genie Space (perguntas em português)
+# MAGIC ## 7 · Genie Space (perguntas em português)
 # MAGIC 1. Menu lateral → **Genie** → **New** → selecione suas tabelas `gold_*` (e `silver_matriculas`).
-# MAGIC 2. Faça perguntas em português:
+# MAGIC 2. Pergunte em português:
 # MAGIC    - _"Qual curso tem a maior taxa de reprovação?"_
 # MAGIC    - _"Quantos alunos estão em risco ALTO no semestre 2026/1?"_
 # MAGIC    - _"Mostre a evolução da nota média de Cálculo 1 ao longo dos semestres."_
-# MAGIC 3. Se o Genie errar, adicione **Instructions** e **Example SQL** no Space para ensiná-lo —
-# MAGIC    e veja a resposta melhorar. **Esse loop de ensinar o Genie é o aprendizado-chave da trilha.**
+# MAGIC 3. Se o Genie errar, adicione **Instructions** e **Example SQL** no Space para ensiná-lo.
+# MAGIC    **Esse loop de ensinar o Genie é o aprendizado-chave da trilha.**
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## ✅ Pronto!
-# MAGIC Você construiu um pipeline Medalhão completo + dashboard + assistente em linguagem natural.
-# MAGIC **Bônus:** transforme as células Bronze/Silver/Gold em um *Lakeflow Declarative Pipeline*
-# MAGIC (peça ao Assistant: _"converta estas tabelas em um pipeline declarativo usando @dp.table"_).
+# MAGIC Você construiu um pipeline declarativo Bronze→Silver→Gold + dashboard + assistente em
+# MAGIC linguagem natural. **Bônus:** ative o **scheduling** do pipeline ou explore o modo
+# MAGIC **streaming contínuo** para ingestão em tempo real.

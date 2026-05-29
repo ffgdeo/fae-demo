@@ -20,7 +20,7 @@ acadêmico sintético; o gabarito completo (testado) está em `solutions/`.
 | 1:40–2:00 | Show & tell: 2-3 alunos mostram o que construíram + Q&A |
 
 ## 🎯 Os 3 momentos "uau" pra garantir que cada um chegue
-- **Trilha 1:** fazer uma pergunta em português no **Genie** e ver o SQL + gráfico aparecerem.
+- **Trilha 1:** ver o **grafo do pipeline declarativo** materializar Bronze→Silver→Gold e, depois, perguntar em português no **Genie**.
 - **Trilha 2:** abrir **Experiments** e ver o run do MLflow com métricas e modelo rastreados.
 - **Trilha 3:** o assistente **respondendo uma pergunta sobre uma prova** citando o PDF de origem.
 
@@ -34,11 +34,19 @@ Se o tempo apertar, priorize chegar nesses momentos — o resto é bônus.
   e seguirem no resto enquanto sobe. Há um **Plano B** no fim do notebook (embeddings em Delta +
   cosseno) caso o endpoint não fique ONLINE a tempo.
 - **AutoML** pode não estar disponível na UI → Trilha 2 usa scikit-learn + MLflow direto.
+- **Trilha 1 é um pipeline declarativo** — o notebook é a *definição*, não roda célula a célula.
+  Os alunos criam um **Pipeline** (Jobs & Pipelines → ETL Pipeline) apontando pro notebook,
+  escolhem catálogo/schema de destino e rodam por lá. Ingestão = **streaming tables** (Auto Loader);
+  Silver/Gold = **materialized views**.
+- **`00_gerar_dados` não cria tabelas** — só deixa CSVs e PDFs no Volume (zona raw). Construir as
+  tabelas é o exercício de cada trilha.
 
 ## 🩹 Problemas comuns e soluções
 | Sintoma | Causa provável | Solução |
 |---|---|---|
 | `Table or view not found` numa trilha | Não rodou o setup | Rode `00_gerar_dados` (Run all) primeiro |
+| Erro de `dp`/`pipelines` ao rodar a Trilha 1 no notebook | Tentou Run All | Trilha 1 não roda assim — crie um **Pipeline** apontando pro notebook e rode por lá |
+| Pipeline não acha os CSVs | Usou catálogo/schema custom no setup | Em Advanced → Configuration, defina `fae.csv_base` pro Volume correto |
 | PDFs não encontrados na Trilha 3 | Repo importado sem `data/exams/` | Reimporte o Git folder; confira a pasta |
 | `ai_query` falha / endpoint não existe | Nome do modelo diferente no workspace | Liste em **Serving** e ajuste o nome no prompt |
 | Geração de dados lenta | Cold start do serverless | Aguarde; é idempotente, pode reexecutar |
