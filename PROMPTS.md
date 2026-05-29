@@ -26,8 +26,8 @@ decora sintaxe — você aprende a pedir bem.** Esta é a habilidade que leva pr
 ## Prompts de partida por trilha
 
 ### Trilha 1 — Data Engineering + AI/BI (pipeline declarativo)
-- _"Seguindo o padrão da `@dp.table` `bronze_matriculas` (streaming table via Auto Loader), crie as streaming tables Bronze para alunos, disciplinas, cursos, departamentos e professores."_
-- _"Crie a materialized view `silver_matriculas` juntando todas as Bronze, com nomes legíveis, colunas `aprovado`/`reprovado` e expectativas `@dp.expect`."_
+- _"Seguindo o padrão da `dp.table` `bronze_matriculas` (streaming table via Auto Loader), crie as streaming tables Bronze para alunos, disciplinas, cursos, departamentos e professores."_
+- _"Crie a materialized view `silver_matriculas` juntando todas as Bronze, com nomes legíveis, colunas `aprovado`/`reprovado` e expectativas `dp.expect`."_
 - _"Crie a materialized view `gold_desempenho_disciplina` com taxa de aprovação e nota média por disciplina e semestre."_
 - No **dashboard AI/BI**: descreva o gráfico em linguagem natural — _"taxa de aprovação média por departamento"_.
 

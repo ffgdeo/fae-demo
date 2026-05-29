@@ -30,7 +30,7 @@ def bronze_matriculas():
         .option("cloudFiles.format", "csv")
         .option("cloudFiles.schemaLocation", f"{SCHEMA_BASE}/bronze_matriculas")
         .option("header", True)
-        .option("inferSchema", True)
+        .option("cloudFiles.inferColumnTypes", "true")
         .load(f"{CSV_BASE}/matriculas")
     )
 
@@ -41,7 +41,7 @@ def bronze_alunos():
         .option("cloudFiles.format", "csv")
         .option("cloudFiles.schemaLocation", f"{SCHEMA_BASE}/bronze_alunos")
         .option("header", True)
-        .option("inferSchema", True)
+        .option("cloudFiles.inferColumnTypes", "true")
         .load(f"{CSV_BASE}/alunos")
     )
 
@@ -52,7 +52,7 @@ def bronze_disciplinas():
         .option("cloudFiles.format", "csv")
         .option("cloudFiles.schemaLocation", f"{SCHEMA_BASE}/bronze_disciplinas")
         .option("header", True)
-        .option("inferSchema", True)
+        .option("cloudFiles.inferColumnTypes", "true")
         .load(f"{CSV_BASE}/disciplinas")
     )
 
@@ -63,7 +63,7 @@ def bronze_departamentos():
         .option("cloudFiles.format", "csv")
         .option("cloudFiles.schemaLocation", f"{SCHEMA_BASE}/bronze_departamentos")
         .option("header", True)
-        .option("inferSchema", True)
+        .option("cloudFiles.inferColumnTypes", "true")
         .load(f"{CSV_BASE}/departamentos")
     )
 
@@ -74,7 +74,7 @@ def bronze_cursos():
         .option("cloudFiles.format", "csv")
         .option("cloudFiles.schemaLocation", f"{SCHEMA_BASE}/bronze_cursos")
         .option("header", True)
-        .option("inferSchema", True)
+        .option("cloudFiles.inferColumnTypes", "true")
         .load(f"{CSV_BASE}/cursos")
     )
 
@@ -85,7 +85,7 @@ def bronze_professores():
         .option("cloudFiles.format", "csv")
         .option("cloudFiles.schemaLocation", f"{SCHEMA_BASE}/bronze_professores")
         .option("header", True)
-        .option("inferSchema", True)
+        .option("cloudFiles.inferColumnTypes", "true")
         .load(f"{CSV_BASE}/professores")
     )
 
@@ -100,7 +100,6 @@ def bronze_professores():
 @dp.expect("nota_p1_valida", "nota_p1 IS NULL OR (nota_p1 >= 0 AND nota_p1 <= 10)")
 @dp.expect("nota_p2_valida", "nota_p2 IS NULL OR (nota_p2 >= 0 AND nota_p2 <= 10)")
 @dp.expect("frequencia_valida", "frequencia_pct IS NULL OR (frequencia_pct >= 0 AND frequencia_pct <= 100)")
-@dp.expect_or_drop("situacao_conhecida", "situacao IN ('aprovado','reprovado_nota','reprovado_frequencia','reprovado_nota_freq','trancado')")
 def silver_matriculas():
     m = spark.read.table("bronze_matriculas")
     a = spark.read.table("bronze_alunos")

@@ -41,7 +41,7 @@
 # MAGIC - Volta na tela do Pipeline e clica em **Start** (ou **Validate**) para rodar.
 # MAGIC - Vê o **grafo** Bronze → Silver → Gold se materializar e corrige o que precisar.
 # MAGIC
-# MAGIC > No modelo declarativo você só **descreve as tabelas** (com `@dp.table`); o Databricks
+# MAGIC > No modelo declarativo você só **descreve as tabelas** (com `dp.table`); o Databricks
 # MAGIC > descobre a ordem, as dependências e a execução incremental por você.
 
 # COMMAND ----------
@@ -72,7 +72,7 @@ SCHEMA_BASE = CSV_BASE.rsplit("/csvs", 1)[0] + "/_schemas"
 # MAGIC %md
 # MAGIC ## 1 · Bronze = Streaming Table (EXEMPLO FUNCIONAL) — copie este padrão
 # MAGIC Ingestão com **Auto Loader** (`cloudFiles`) via `spark.readStream`. Por ser uma consulta de
-# MAGIC streaming, o `@dp.table` materializa isto como uma **streaming table** (ingestão incremental).
+# MAGIC streaming, o `dp.table` materializa isto como uma **streaming table** (ingestão incremental).
 
 # COMMAND ----------
 
@@ -95,14 +95,14 @@ def bronze_matriculas():
 # MAGIC
 # MAGIC **Prompt para o Genie Code** (✨ ou `Cmd/Ctrl + I`):
 # MAGIC
-# MAGIC > _"Seguindo exatamente o mesmo padrão da função `bronze_matriculas` (decorator `@dp.table`,
+# MAGIC > _"Seguindo exatamente o mesmo padrão da função `bronze_matriculas` (decorator `dp.table`,
 # MAGIC > Auto Loader com cloudFiles lendo de `{CSV_BASE}/<nome>` e schemaLocation em
-# MAGIC > `{SCHEMA_BASE}/<nome>`), gere uma função `@dp.table` para cada um destes CSVs: alunos,
+# MAGIC > `{SCHEMA_BASE}/<nome>`), gere uma função `dp.table` para cada um destes CSVs: alunos,
 # MAGIC > disciplinas, cursos, departamentos, professores."_
 
 # COMMAND ----------
 
-# 👇 gere aqui as demais tabelas @dp.table de Bronze
+# 👇 gere aqui as demais tabelas dp.table de Bronze
 
 
 # COMMAND ----------
@@ -110,7 +110,7 @@ def bronze_matriculas():
 # MAGIC %md
 # MAGIC ## 3 · 🧞 SUA VEZ — Silver = Materialized View (limpeza + junção + qualidade)
 # MAGIC Silver = dados limpos e enriquecidos, como uma **materialized view** (consulta batch sobre as
-# MAGIC tabelas Bronze). Aproveite as **expectativas de qualidade** (`@dp.expect`) para validar.
+# MAGIC tabelas Bronze). Aproveite as **expectativas de qualidade** (`dp.expect`) para validar.
 # MAGIC
 # MAGIC **Prompt sugerido:**
 # MAGIC
@@ -119,8 +119,8 @@ def bronze_matriculas():
 # MAGIC > `bronze_disciplinas` (disciplina_id), `bronze_cursos`, `bronze_departamentos` e
 # MAGIC > `bronze_professores`. Inclua nomes legíveis (aluno_nome, disciplina_nome, curso_nome,
 # MAGIC > professor_nome) e colunas booleanas `aprovado`/`reprovado` derivadas de `situacao`.
-# MAGIC > Adicione expectativas com `@dp.expect` para nota_p1, nota_p2 (0 a 10) e frequencia_pct
-# MAGIC > (0 a 100), e `@dp.expect_or_drop` para descartar situações inválidas."_
+# MAGIC > Adicione expectativas com `dp.expect` para nota_p1, nota_p2 (entre 0 e 10) e frequencia_pct
+# MAGIC > (entre 0 e 100)."_
 
 # COMMAND ----------
 
@@ -169,6 +169,13 @@ def bronze_matriculas():
 # MAGIC 3. Em **Canvas** → **Add a visualization**, descreva o gráfico em linguagem natural:
 # MAGIC    _"taxa de aprovação média por departamento"_, _"top 10 disciplinas com menor aprovação"_,
 # MAGIC    _"evolução da nota média por semestre"_. O AI/BI gera a query e o gráfico.
+# MAGIC
+# MAGIC **🧞 Prompt geral para o assistente de AI/BI** (cole no campo *Ask the Assistant* / *Add a visualization*):
+# MAGIC
+# MAGIC > _"Crie um painel de desempenho acadêmico a partir das minhas tabelas `gold_*`, com: (1) taxa de
+# MAGIC > aprovação média por departamento, (2) as 10 disciplinas com menor taxa de aprovação, (3) evolução
+# MAGIC > da nota média e da taxa de aprovação por semestre, e (4) número de alunos por curso. Escolha o
+# MAGIC > tipo de gráfico mais adequado para cada métrica e adicione um título claro em português."_
 
 # COMMAND ----------
 
