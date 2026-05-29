@@ -12,11 +12,18 @@
 # MAGIC
 # MAGIC > **Rode todas as células** (`Run all`). Leva ~3-5 min em compute serverless.
 # MAGIC > É idempotente — pode rodar de novo sem problemas. Depois, abra a trilha que você escolheu.
+# MAGIC
+# MAGIC > 🎛️ Catálogo e schema são definidos por **widgets** no topo (padrão: `workspace` /
+# MAGIC > `sistema_academico`). Os notebooks das trilhas assumem esses valores — só mude se souber
+# MAGIC > o que está fazendo (aí ajuste as trilhas também).
 
 # COMMAND ----------
 
-CATALOG = "workspace"
-SCHEMA = "sistema_academico"
+dbutils.widgets.text("catalog", "workspace", "Catalog")
+dbutils.widgets.text("schema", "sistema_academico", "Schema")
+CATALOG = dbutils.widgets.get("catalog")
+SCHEMA = dbutils.widgets.get("schema")
+print(f"Usando {CATALOG}.{SCHEMA}")
 
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA}")
 spark.sql(f"USE {CATALOG}.{SCHEMA}")
@@ -243,7 +250,7 @@ import csv, os, io
 from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
-CSV_BASE = "/Volumes/workspace/sistema_academico/staging/csvs"
+CSV_BASE = f"/Volumes/{CATALOG}/{SCHEMA}/staging/csvs"
 
 def upload_csv(table_name, header, rows):
     """Escreve CSV em /tmp e faz upload para o Volume (em diretorio para Auto Loader)."""
@@ -339,7 +346,7 @@ local_dir = f"/Workspace{exams_ws_dir}"
 print(f"Looking for PDFs in: {local_dir}")
 print(f"Files found: {os.listdir(local_dir)}")
 
-volume_target = "/Volumes/workspace/sistema_academico/staging/exams"
+volume_target = f"/Volumes/{CATALOG}/{SCHEMA}/staging/exams"
 uploaded = 0
 
 for fname in sorted(os.listdir(local_dir)):

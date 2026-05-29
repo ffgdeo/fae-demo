@@ -4,12 +4,16 @@
 # MAGIC # Trilha 3 · RAG (Retrieval-Augmented Generation)
 # MAGIC
 # MAGIC **Objetivo:** construir um assistente que responde perguntas sobre **provas anteriores**
-# MAGIC (12 PDFs reais de disciplinas), buscando os trechos relevantes e gerando a resposta com um LLM.
+# MAGIC (12 PDFs reais de disciplinas), buscando os trechos relevantes com **Vector Search** e
+# MAGIC gerando a resposta com um LLM.
 # MAGIC
 # MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` antes deste (ele sobe os PDFs ao Volume).
 # MAGIC
 # MAGIC Este notebook já faz a **ingestão dos PDFs** (parsing → tabela de trechos).
-# MAGIC Você constrói a busca + geração com o **Databricks Assistant** (células 🧞 **SUA VEZ**).
+# MAGIC Você constrói o índice de busca + geração com o **Databricks Assistant** (células 🧞 **SUA VEZ**).
+# MAGIC
+# MAGIC > ⏱️ **Comece pela célula 2 logo no início:** criar o Vector Search endpoint leva ~10 min.
+# MAGIC > Dispare a criação, e enquanto ele sobe você avança no resto.
 
 # COMMAND ----------
 
@@ -25,6 +29,7 @@ display(dbutils.fs.ls(EXAMS))
 # MAGIC ## 1 · Ingestão dos PDFs (FUNCIONAL) — parsing com `ai_parse_document`
 # MAGIC Lemos os PDFs binários, extraímos o texto com a função de IA nativa do Databricks
 # MAGIC e gravamos uma linha por prova na tabela `exam_chunks`. Esta é a "matéria-prima" do RAG.
+# MAGIC O índice de Vector Search precisa de **Change Data Feed** ligado, então já habilitamos aqui.
 
 # COMMAND ----------
 
@@ -47,6 +52,9 @@ display(dbutils.fs.ls(EXAMS))
 # MAGIC )
 # MAGIC SELECT monotonically_increasing_id() AS chunk_id, exam_filename, full_text AS chunk
 # MAGIC FROM extracted WHERE length(full_text) > 50;
+# MAGIC
+# MAGIC -- Vector Search (Delta Sync Index) exige Change Data Feed
+# MAGIC ALTER TABLE exam_chunks SET TBLPROPERTIES (delta.enableChangeDataFeed = true);
 
 # COMMAND ----------
 
@@ -55,18 +63,35 @@ display(spark.sql("SELECT exam_filename, length(chunk) AS chars, left(chunk, 300
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 2 · 🧞 SUA VEZ — Caminho A (recomendado p/ workshop): RAG leve com embeddings em tabela
-# MAGIC Rápido e sem depender de criar um endpoint de Vector Search (que demora ~10 min no Free Edition).
+# MAGIC ## 2 · 🧞 SUA VEZ — Crie o Vector Search endpoint (dispare AGORA, leva ~10 min)
+# MAGIC O endpoint é a infra que serve o índice. Crie-o **primeiro** e siga em frente enquanto sobe.
 # MAGIC
-# MAGIC **Prompts sugeridos** (Assistant: ✨ ou `Cmd/Ctrl + I`):
+# MAGIC **Prompt sugerido** (Assistant: ✨ ou `Cmd/Ctrl + I`):
 # MAGIC
-# MAGIC > _"Para cada linha de `exam_chunks`, gere o embedding da coluna `chunk` usando o endpoint
-# MAGIC > de foundation model `databricks-gte-large-en` via `ai_query`, e salve numa nova coluna
-# MAGIC > `embedding` numa tabela `exam_embeddings`."_
+# MAGIC > _"Usando o pacote `databricks-vectorsearch`, crie um Vector Search endpoint chamado
+# MAGIC > `exam-search` do tipo STANDARD, se ele ainda não existir. Não bloqueie esperando ficar
+# MAGIC > ONLINE — só dispare a criação e me mostre o status atual."_
 # MAGIC
-# MAGIC > _"Escreva uma função Python `buscar(pergunta, k=3)` que: gera o embedding da pergunta com o
-# MAGIC > mesmo endpoint, calcula a similaridade de cosseno contra `exam_embeddings` e retorna os k
-# MAGIC > trechos mais parecidos."_
+# MAGIC 💡 Você pode acompanhar o status em **Compute → Vector Search** na interface.
+
+# COMMAND ----------
+
+# 👇 gere aqui a criação do endpoint
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 3 · 🧞 SUA VEZ — Crie o índice (Delta Sync com embeddings gerenciados)
+# MAGIC O índice faz o embedding automático da coluna `chunk` e mantém sincronia com a tabela Delta.
+# MAGIC
+# MAGIC **Prompt sugerido:**
+# MAGIC
+# MAGIC > _"Crie um Delta Sync Index chamado `workspace.sistema_academico.exam_chunks_vs_index` no
+# MAGIC > endpoint `exam-search`, a partir da tabela `workspace.sistema_academico.exam_chunks`.
+# MAGIC > Use `chunk_id` como primary key, faça o embedding gerenciado da coluna `chunk` com o
+# MAGIC > modelo `databricks-gte-large-en`, e configure pipeline_type TRIGGERED. Espere o índice
+# MAGIC > ficar pronto."_
 
 # COMMAND ----------
 
@@ -75,7 +100,22 @@ display(spark.sql("SELECT exam_filename, length(chunk) AS chars, left(chunk, 300
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 3 · 🧞 SUA VEZ — Geração da resposta com LLM
+# MAGIC ## 4 · 🧞 SUA VEZ — Busca semântica no índice
+# MAGIC
+# MAGIC **Prompt sugerido:**
+# MAGIC
+# MAGIC > _"Escreva uma função `buscar(pergunta, k=3)` que usa o `similarity_search` do índice
+# MAGIC > `exam_chunks_vs_index` para retornar os k trechos mais relevantes (colunas
+# MAGIC > `exam_filename` e `chunk`). Teste com a pergunta 'tópicos de banco de dados'."_
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 5 · 🧞 SUA VEZ — Geração da resposta com LLM
 # MAGIC
 # MAGIC **Prompt sugerido:**
 # MAGIC
@@ -95,25 +135,19 @@ display(spark.sql("SELECT exam_filename, length(chunk) AS chars, left(chunk, 300
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 4 · 🧞 SUA VEZ (opcional / avançado) — Caminho B: Vector Search gerenciado
-# MAGIC Versão "de produção" usando índice gerenciado. **Atenção:** criar o endpoint leva ~10 min.
+# MAGIC ## Plano B (só se o endpoint demorar demais) — RAG leve sem Vector Search
+# MAGIC Se o endpoint não ficar ONLINE a tempo, dá pra fazer a busca sem ele e não travar o exercício:
 # MAGIC
-# MAGIC **Prompts sugeridos:**
+# MAGIC > _"Sem usar Vector Search: gere embeddings da coluna `chunk` de `exam_chunks` com `ai_query`
+# MAGIC > e o endpoint `databricks-gte-large-en`, salve numa tabela, e reescreva `buscar(pergunta, k=3)`
+# MAGIC > usando similaridade de cosseno em Python."_
 # MAGIC
-# MAGIC > _"Habilite Change Data Feed em `exam_chunks` e crie um Vector Search endpoint chamado
-# MAGIC > `exam-search` e um Delta Sync Index `exam_chunks_vs_index` que faça o embedding automático
-# MAGIC > da coluna `chunk` com `databricks-gte-large-en`."_
-# MAGIC
-# MAGIC > _"Consulte o índice com `similarity_search` para a pergunta X e me mostre os resultados."_
-
-# COMMAND ----------
-
-
+# MAGIC O resto (célula 5, geração com LLM) continua igual.
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## ✅ Pronto!
-# MAGIC Você construiu um pipeline RAG: documentos → parsing → embeddings → busca → resposta com LLM.
+# MAGIC Você construiu um pipeline RAG: documentos → parsing → índice Vector Search → busca → resposta com LLM.
 # MAGIC **Bônus:** peça ao Assistant para _"criar um app de chat em Gradio que usa a função
 # MAGIC `responder`"_ e publique como um **Databricks App**.

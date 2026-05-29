@@ -29,8 +29,10 @@ Se o tempo apertar, priorize chegar nesses momentos — o resto é bônus.
 ## ⚠️ Particularidades do Free Edition (já validadas)
 - **Serverless apenas** — sem clusters clássicos, sem Lakebase. Tudo roda em compute serverless.
 - **`ai_query` funciona com modelos abertos** (Llama, GTE) — base das Trilhas 2/3.
-- **Vector Search demora ~10 min** pra subir o endpoint. Por isso a Trilha 3 usa o **Caminho A**
-  (embeddings em tabela Delta + cosseno) como padrão; o Vector Search gerenciado é opcional/avançado.
+- **Vector Search demora ~10 min** pra subir o endpoint. A Trilha 3 usa **Vector Search gerenciado
+  como caminho padrão** — oriente os alunos a **dispararem a criação do endpoint logo na célula 2**
+  e seguirem no resto enquanto sobe. Há um **Plano B** no fim do notebook (embeddings em Delta +
+  cosseno) caso o endpoint não fique ONLINE a tempo.
 - **AutoML** pode não estar disponível na UI → Trilha 2 usa scikit-learn + MLflow direto.
 
 ## 🩹 Problemas comuns e soluções

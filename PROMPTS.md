@@ -37,8 +37,9 @@ decora sintaxe — você aprende a pedir bem.** Esta é a habilidade que leva pr
 - _"Plote a importância das features e a curva ROC."_
 
 ### Trilha 3 — RAG
-- _"Gere embeddings da coluna `chunk` de `exam_chunks` com `ai_query` e o endpoint `databricks-gte-large-en`."_
-- _"Escreva `buscar(pergunta, k=3)` usando similaridade de cosseno."_
+- _"Crie um Vector Search endpoint `exam-search` (STANDARD) se ainda não existir, sem bloquear esperando ficar ONLINE."_ ⏱️ dispare cedo (~10 min)
+- _"Crie um Delta Sync Index `exam_chunks_vs_index` no endpoint `exam-search` a partir de `exam_chunks`, com embedding gerenciado da coluna `chunk` usando `databricks-gte-large-en`."_
+- _"Escreva `buscar(pergunta, k=3)` usando o `similarity_search` do índice."_
 - _"Escreva `responder(pergunta)` que usa os trechos como contexto e gera a resposta com `ai_query` e o modelo `databricks-meta-llama-3-3-70b-instruct`."_
 
 ## Quando travar
