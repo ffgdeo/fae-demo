@@ -81,9 +81,8 @@ def bronze_matriculas():
     return (
         spark.readStream.format("cloudFiles")
         .option("cloudFiles.format", "csv")
-        .option("cloudFiles.schemaLocation", f"{SCHEMA_BASE}/bronze_matriculas")
         .option("header", True)
-        .option("inferSchema", True)
+        .option("cloudFiles.inferColumnTypes", "true")
         .load(f"{CSV_BASE}/matriculas")
     )
 
