@@ -9,18 +9,31 @@
 # MAGIC e depois construir um **dashboard AI/BI** e um **Genie Space**.
 # MAGIC
 # MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` antes (ele deixa os CSVs no Volume).
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC # 🛑 PARE E LEIA ANTES DE TUDO — configure o Pipeline primeiro
 # MAGIC
-# MAGIC ### ⚠️ Este notebook é a *definição* de um pipeline — você NÃO roda célula a célula aqui!
-# MAGIC No modelo declarativo, você **descreve as tabelas** (com `@dp.table`) e o Databricks
-# MAGIC descobre a ordem, as dependências e a execução incremental por você. O fluxo é:
+# MAGIC Este notebook é a **definição de um pipeline declarativo**. Ele **não roda célula a célula**
+# MAGIC (se você apertar *Run*, vai dar erro `cannot import name 'pipelines'` — isso é esperado, e
+# MAGIC **não** é limitação do Free Edition: `pyspark.pipelines` só existe dentro de um Pipeline).
 # MAGIC
-# MAGIC 1. Edite/complete as definições neste notebook (com ajuda do **Databricks Assistant**).
-# MAGIC 2. Crie um **Pipeline** apontando para este notebook (passo a passo na última célula).
-# MAGIC 3. Rode o pipeline e veja o grafo Bronze → Silver → Gold se materializar.
+# MAGIC ### ➡️ Passo 0 — crie o Pipeline ANTES de escrever ou rodar qualquer código:
+# MAGIC 1. Menu lateral → **Jobs & Pipelines** → **Create** → **ETL Pipeline** (Spark Declarative Pipeline).
+# MAGIC 2. **Source code:** aponte para **ESTE notebook** (`track1_dados_aibi_genie`).
+# MAGIC 3. **Destination:** escolha seu **Catalog** e **Target schema** (ex.: `workspace` / `sistema_academico`).
+# MAGIC 4. (Opcional) Se usou catálogo/schema diferente no `00_gerar_dados`, em **Advanced → Configuration**
+# MAGIC    adicione `fae.csv_base = /Volumes/<seu_catalogo>/<seu_schema>/staging/csvs`.
+# MAGIC 5. Clique em **Create**. Deixe a janela do Pipeline aberta.
 # MAGIC
-# MAGIC > 🎛️ O **catálogo** e o **schema** de destino são escolhidos nas *configurações do pipeline*
-# MAGIC > (não em widgets). O caminho dos CSVs vem de uma config `fae.csv_base` — se você usou o
-# MAGIC > schema padrão no `00_gerar_dados`, o default abaixo já funciona.
+# MAGIC ### Depois disso, o ciclo de trabalho é:
+# MAGIC - Você **edita/completa** as definições de tabela aqui (com ajuda do **Databricks Assistant**).
+# MAGIC - Volta na tela do Pipeline e clica em **Start** (ou **Validate**) para rodar.
+# MAGIC - Vê o **grafo** Bronze → Silver → Gold se materializar e corrige o que precisar.
+# MAGIC
+# MAGIC > No modelo declarativo você só **descreve as tabelas** (com `@dp.table`); o Databricks
+# MAGIC > descobre a ordem, as dependências e a execução incremental por você.
 
 # COMMAND ----------
 
@@ -128,14 +141,13 @@ def bronze_matriculas():
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 5 · Crie e rode o Pipeline (na interface)
-# MAGIC 1. Menu lateral → **Jobs & Pipelines** → **Create** → **ETL Pipeline** (Spark Declarative Pipeline).
-# MAGIC 2. **Source code:** aponte para **este notebook** (`track1_dados_aibi_genie`).
-# MAGIC 3. **Destination:** escolha seu **Catalog** e **Target schema** (ex.: `workspace` / `sistema_academico`).
-# MAGIC 4. (Opcional) Se você usou um schema diferente no `00_gerar_dados`, em **Advanced → Configuration**
-# MAGIC    adicione `fae.csv_base = /Volumes/<seu_catalogo>/<seu_schema>/staging/csvs`.
-# MAGIC 5. Clique em **Create** e depois em **Start**. Acompanhe o **grafo** Bronze → Silver → Gold.
-# MAGIC 6. Quando terminar, suas tabelas estarão no catálogo/schema escolhido. 🎉
+# MAGIC ## 5 · Rode o Pipeline (você já o criou no Passo 0)
+# MAGIC 1. Volte para a tela do **Pipeline** que você criou no início.
+# MAGIC 2. Clique em **Start** (rodar tudo) ou **Validate** (só checar sem materializar).
+# MAGIC 3. Acompanhe o **grafo** Bronze → Silver → Gold ficar verde; clique em cada tabela para ver
+# MAGIC    contagem de linhas e métricas das expectativas de qualidade.
+# MAGIC 4. Deu erro em alguma tabela? Ajuste a definição aqui, salve, e clique em **Start** de novo.
+# MAGIC 5. Quando terminar, suas tabelas estarão no catálogo/schema escolhido. 🎉
 
 # COMMAND ----------
 
