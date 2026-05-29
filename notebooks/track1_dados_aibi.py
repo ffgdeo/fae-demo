@@ -1,12 +1,15 @@
 # Databricks notebook source
 
 # MAGIC %md
-# MAGIC # Trilha 1 · Data Engineering + AI/BI + Genie
+# MAGIC # Trilha 1 · Data Engineering + AI/BI
 # MAGIC ## (com **Lakeflow Spark Declarative Pipelines**)
 # MAGIC
 # MAGIC **Objetivo:** transformar os CSVs brutos da universidade em tabelas confiáveis
 # MAGIC (arquitetura **Medalhão**: Bronze → Silver → Gold) usando um **pipeline declarativo**,
-# MAGIC e depois construir um **dashboard AI/BI** e um **Genie Space**.
+# MAGIC e depois construir um **dashboard AI/BI**.
+# MAGIC
+# MAGIC > 🧞 Quer explorar dados em linguagem natural com **Genie**? Isso é a **Trilha 2**
+# MAGIC > (sobre um dataset de mercado financeiro). Aqui o foco é construir as tabelas e o dashboard.
 # MAGIC
 # MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` antes (ele deixa os CSVs no Volume).
 
@@ -25,7 +28,7 @@
 # MAGIC    a gente vai apontar o pipeline para ESTE notebook em vez do arquivo de exemplo.
 # MAGIC 3. Abra **Settings** (⚙️ / *Pipeline settings*) e ajuste:
 # MAGIC    - **Root folder:** aponte para a pasta deste repositório (onde está a pasta `notebooks/`).
-# MAGIC    - **Source code / Paths:** aponte para **ESTE notebook** (`notebooks/track1_dados_aibi_genie`)
+# MAGIC    - **Source code / Paths:** aponte para **ESTE notebook** (`notebooks/track1_dados_aibi`)
 # MAGIC      e **remova** o arquivo `.py` de exemplo que veio por padrão.
 # MAGIC    - **Default catalog** e **Default schema:** escolha onde as tabelas serão criadas
 # MAGIC      (ex.: `workspace` / `sistema_academico` — os mesmos do `00_gerar_dados`).
@@ -34,7 +37,7 @@
 # MAGIC 5. **Salve** as settings. Deixe a janela do Pipeline aberta.
 # MAGIC
 # MAGIC ### Depois disso, o ciclo de trabalho é:
-# MAGIC - Você **edita/completa** as definições de tabela aqui (com ajuda do **Databricks Assistant**).
+# MAGIC - Você **edita/completa** as definições de tabela aqui (com ajuda do **Genie Code**).
 # MAGIC - Volta na tela do Pipeline e clica em **Start** (ou **Validate**) para rodar.
 # MAGIC - Vê o **grafo** Bronze → Silver → Gold se materializar e corrige o que precisar.
 # MAGIC
@@ -91,7 +94,7 @@ def bronze_matriculas():
 # MAGIC Faltam: `bronze_alunos`, `bronze_disciplinas`, `bronze_cursos`,
 # MAGIC `bronze_departamentos`, `bronze_professores` (os CSVs têm esses mesmos nomes).
 # MAGIC
-# MAGIC **Prompt para o Assistant** (✨ ou `Cmd/Ctrl + I`):
+# MAGIC **Prompt para o Genie Code** (✨ ou `Cmd/Ctrl + I`):
 # MAGIC
 # MAGIC > _"Seguindo exatamente o mesmo padrão da função `bronze_matriculas` (decorator `@dp.table`,
 # MAGIC > Auto Loader com cloudFiles lendo de `{CSV_BASE}/<nome>` e schemaLocation em
@@ -140,8 +143,8 @@ def bronze_matriculas():
 # MAGIC > _"Crie a materialized view `gold_desempenho_departamento`: por departamento e semestre, total
 # MAGIC > de matrículas, taxa de aprovação (%) e nota média."_
 # MAGIC
-# MAGIC > 💡 Previsão de alunos em risco é **Machine Learning** — fica na Trilha 2. Aqui no Data
-# MAGIC > Engineering ficamos nas agregações analíticas (sem modelos).
+# MAGIC > 💡 Previsão de alunos em risco é **Machine Learning** — fica na Trilha 3 (opcional). Aqui no
+# MAGIC > Data Engineering ficamos nas agregações analíticas (sem modelos).
 
 # COMMAND ----------
 
@@ -171,19 +174,10 @@ def bronze_matriculas():
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 7 · Genie Space (perguntas em português)
-# MAGIC 1. Menu lateral → **Genie** → **New** → selecione suas tabelas `gold_*` (e `silver_matriculas`).
-# MAGIC 2. Pergunte em português:
-# MAGIC    - _"Qual curso tem a maior taxa de reprovação?"_
-# MAGIC    - _"Qual departamento tem a melhor taxa de aprovação?"_
-# MAGIC    - _"Mostre a evolução da nota média de Cálculo 1 ao longo dos semestres."_
-# MAGIC 3. Se o Genie errar, adicione **Instructions** e **Example SQL** no Space para ensiná-lo.
-# MAGIC    **Esse loop de ensinar o Genie é o aprendizado-chave da trilha.**
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC ## ✅ Pronto!
-# MAGIC Você construiu um pipeline declarativo Bronze→Silver→Gold + dashboard + assistente em
-# MAGIC linguagem natural. **Bônus:** ative o **scheduling** do pipeline ou explore o modo
-# MAGIC **streaming contínuo** para ingestão em tempo real.
+# MAGIC Você construiu um pipeline declarativo Bronze→Silver→Gold + dashboard AI/BI.
+# MAGIC **Bônus:** ative o **scheduling** do pipeline ou explore o modo **streaming contínuo**
+# MAGIC para ingestão em tempo real.
+# MAGIC
+# MAGIC > 🧞 Curtiu? Na **Trilha 2** você pergunta a um **Genie Space** em linguagem natural
+# MAGIC > (e aprende a ensiná-lo) sobre um dataset de mercado financeiro.

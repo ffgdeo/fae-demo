@@ -1,7 +1,10 @@
 # Databricks notebook source
 
 # MAGIC %md
-# MAGIC # Trilha 2 · Machine Learning Clássico
+# MAGIC # Trilha 3 (opcional) · Machine Learning Clássico
+# MAGIC
+# MAGIC > 🧩 **Trilha opcional / aprofundamento.** Se sobrar tempo (ou pra fazer em casa depois). Usa o
+# MAGIC > mesmo dataset acadêmico da Trilha 1.
 # MAGIC
 # MAGIC **Objetivo:** treinar um modelo que prevê se um aluno vai **reprovar** uma disciplina,
 # MAGIC usando engenharia de atributos + scikit-learn, e rastrear tudo com **MLflow**.
@@ -9,7 +12,7 @@
 # MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` antes deste.
 # MAGIC
 # MAGIC Este notebook te entrega os dados prontos e um exemplo de atributo.
-# MAGIC Você constrói o modelo com o **Databricks Assistant** (células 🧞 **SUA VEZ**).
+# MAGIC Você constrói o modelo com o **Genie Code** (células 🧞 **SUA VEZ**).
 
 # COMMAND ----------
 
@@ -78,7 +81,7 @@ df.head()
 # MAGIC ## 2 · 🧞 SUA VEZ — Engenharia de atributos
 # MAGIC Notas e frequência da própria matrícula são fortes, mas o **histórico do aluno** ajuda muito.
 # MAGIC
-# MAGIC **Prompt sugerido para o Assistant** (✨ ou `Cmd/Ctrl + I`):
+# MAGIC **Prompt sugerido para o Genie Code** (✨ ou `Cmd/Ctrl + I`):
 # MAGIC
 # MAGIC > _"A partir da tabela `matriculas` (ignorando situacao='trancado'), crie um DataFrame de
 # MAGIC > atributos por aluno com: CRA acumulado (média de nota_final), total de disciplinas cursadas,
@@ -132,6 +135,6 @@ df.head()
 # MAGIC %md
 # MAGIC ## ✅ Pronto!
 # MAGIC Você treinou e rastreou um modelo de ML de ponta a ponta.
-# MAGIC **Bônus:** peça ao Assistant para _"registrar o modelo no Unity Catalog e servi-lo num
+# MAGIC **Bônus:** peça ao Genie Code para _"registrar o modelo no Unity Catalog e servi-lo num
 # MAGIC endpoint de Model Serving"_, ou para _"comparar GradientBoosting com RandomForest e
 # MAGIC LogisticRegression no MLflow"_.

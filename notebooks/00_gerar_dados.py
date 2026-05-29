@@ -3,12 +3,14 @@
 # MAGIC %md
 # MAGIC # 00 · Setup — Geração dos Dados (rode isto PRIMEIRO)
 # MAGIC
-# MAGIC Este é o **ponto de partida comum** das 3 trilhas. Ele só faz uma coisa:
-# MAGIC **deixa dados brutos no Volume** (a "zona raw"). Nenhuma tabela é criada aqui —
-# MAGIC construir as tabelas é justamente o seu trabalho nas trilhas. 😉
+# MAGIC Este é o **ponto de partida** da **Trilha 1** (Data Engineering) e da **Trilha 3** (ML, opcional).
+# MAGIC Ele só faz uma coisa: **deixa dados brutos no Volume** (a "zona raw"). Nenhuma tabela é criada
+# MAGIC aqui — construir as tabelas é justamente o seu trabalho nas trilhas. 😉
 # MAGIC
-# MAGIC - **CSVs brutos** no Volume `staging/csvs/` → matéria-prima das Trilhas 1 (Data Engineering) e 2 (ML)
-# MAGIC - **PDFs de provas** no Volume `staging/exams/` → matéria-prima da Trilha 3 (RAG)
+# MAGIC - **CSVs brutos** no Volume `staging/csvs/` → matéria-prima da Trilha 1 (Data Engineering) e da Trilha 3 (ML)
+# MAGIC
+# MAGIC > 🧞 A **Trilha 2 (Genie)** usa um dataset diferente (mercado financeiro) e tem os **próprios**
+# MAGIC > notebooks de setup em `notebooks/track2_genie/` — não depende deste.
 # MAGIC
 # MAGIC > **Rode todas as células** (`Run all`). Leva ~3-5 min em compute serverless.
 # MAGIC > É idempotente — pode rodar de novo sem problemas. Depois, abra a trilha que você escolheu.
@@ -277,41 +279,6 @@ print("CSVs gravados no Volume.")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Upload de PDFs de provas
-
-# COMMAND ----------
-
-import os
-
-notebook_path = dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
-base_dir = notebook_path.rsplit("/notebooks", 1)[0]
-exams_ws_dir = f"{base_dir}/data/exams"
-local_dir = f"/Workspace{exams_ws_dir}"
-
-print(f"Looking for PDFs in: {local_dir}")
-print(f"Files found: {os.listdir(local_dir)}")
-
-volume_target = f"/Volumes/{CATALOG}/{SCHEMA}/staging/exams"
-uploaded = 0
-
-for fname in sorted(os.listdir(local_dir)):
-    if not fname.endswith(".pdf"):
-        continue
-    local_path = os.path.join(local_dir, fname)
-    target_path = f"{volume_target}/{fname}"
-
-    with open(local_path, "rb") as f:
-        w.files.upload(target_path, f, overwrite=True)
-
-    size = os.path.getsize(local_path)
-    print(f"  {fname} ({size} bytes)")
-    uploaded += 1
-
-print(f"\n{uploaded} PDFs uploaded to {volume_target}")
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC ## Confira a zona raw
 # MAGIC Os dados brutos estão no Volume. Nenhuma tabela foi criada — isso é com você nas trilhas.
 
@@ -320,7 +287,7 @@ print(f"\n{uploaded} PDFs uploaded to {volume_target}")
 print("CSVs disponíveis:")
 display(dbutils.fs.ls(CSV_BASE))
 
-print("Amostra do CSV de matrículas (matéria-prima das Trilhas 1 e 2):")
+print("Amostra do CSV de matrículas (matéria-prima da Trilha 1 e da Trilha 3 · ML):")
 display(
     spark.read.option("header", True).option("inferSchema", True)
     .csv(f"{CSV_BASE}/matriculas").limit(5)
