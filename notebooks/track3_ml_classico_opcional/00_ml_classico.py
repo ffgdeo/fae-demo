@@ -9,7 +9,8 @@
 # MAGIC **Objetivo:** treinar um modelo que prevê se um aluno vai **reprovar** uma disciplina,
 # MAGIC usando engenharia de atributos + scikit-learn, e rastrear tudo com **MLflow**.
 # MAGIC
-# MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` antes deste.
+# MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` (em `notebooks/track1_dados_aibi/`) antes deste —
+# MAGIC esta trilha usa o mesmo dataset acadêmico da Trilha 1.
 # MAGIC
 # MAGIC Este notebook te entrega os dados prontos e um exemplo de atributo.
 # MAGIC Você constrói o modelo com o **Genie Code** (células 🧞 **SUA VEZ**).

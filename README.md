@@ -22,9 +22,9 @@ São duas trilhas principais + uma opcional:
 
 | Trilha | Setup (rode primeiro) | Notebook(s) da trilha | O que você constrói |
 |---|---|---|---|
-| 1 · Data Engineering + AI/BI | `notebooks/00_gerar_dados` | `notebooks/track1_dados_aibi` | Pipeline declarativo (streaming tables + materialized views) Bronze→Silver→Gold + dashboard AI/BI |
-| 2 · Genie 🧞 | `notebooks/track2_genie/00`, `01`, `02` | `notebooks/track2_genie/03_construir_genie_space` | Um Genie Space que responde perguntas de mercado em português — e como **ensiná-lo** |
-| 3 · ML Clássico *(opcional)* | `notebooks/00_gerar_dados` | `notebooks/track3_ml_classico_opcional` | Modelo de predição de reprovação com MLflow |
+| 1 · Data Engineering + AI/BI | `track1_dados_aibi/00_gerar_dados` | `track1_dados_aibi/01_dados_aibi` | Pipeline declarativo (streaming tables + materialized views) Bronze→Silver→Gold + dashboard AI/BI |
+| 2 · Genie 🧞 | `track2_genie/00`, `01`, `02` | `track2_genie/03_construir_genie_space` | Um Genie Space que responde perguntas de mercado em português — e como **ensiná-lo** |
+| 3 · ML Clássico *(opcional)* | `track1_dados_aibi/00_gerar_dados` | `track3_ml_classico_opcional/00_ml_classico` | Modelo de predição de reprovação com MLflow |
 
 > 🎛️ Todos os notebooks têm widgets de **catalog** e **schema** no topo. As Trilhas 1 e 3 usam o
 > padrão `workspace` / `sistema_academico`; a Trilha 2 usa `workspace` / `mercado_acoes`. Use os
@@ -41,10 +41,12 @@ Veja o guia **[PROMPTS.md](PROMPTS.md)** — saber pedir bem ao Genie Code é a 
 
 ```
 notebooks/
-  00_gerar_dados.py        # setup acadêmico (Trilhas 1 e 3) — rode primeiro
-  track1_dados_aibi.py     # Trilha 1 — pipeline + dashboard
+  track1_dados_aibi/
+    00_gerar_dados.py      # setup acadêmico — rode primeiro (também é pré-req da Trilha 3)
+    01_dados_aibi.py       # Trilha 1 — pipeline + dashboard
   track2_genie/            # Trilha 2 — setup (00-02) + construir o Genie (03)
-  track3_ml_classico_opcional.py
+  track3_ml_classico_opcional/
+    00_ml_classico.py      # Trilha 3 (opcional) — ML + MLflow
 solutions/                 # gabarito completo — só espie se travar de verdade 😉
 ```
 

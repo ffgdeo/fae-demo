@@ -11,7 +11,7 @@
 # MAGIC > 🧞 Quer explorar dados em linguagem natural com **Genie**? Isso é a **Trilha 2**
 # MAGIC > (sobre um dataset de mercado financeiro). Aqui o foco é construir as tabelas e o dashboard.
 # MAGIC
-# MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` antes (ele deixa os CSVs no Volume).
+# MAGIC **Pré-requisito:** rode o notebook `00_gerar_dados` (na mesma pasta) antes — ele deixa os CSVs no Volume.
 
 # COMMAND ----------
 
@@ -28,7 +28,7 @@
 # MAGIC    a gente vai apontar o pipeline para ESTE notebook em vez do arquivo de exemplo.
 # MAGIC 3. Abra **Settings** (⚙️ / *Pipeline settings*) e ajuste:
 # MAGIC    - **Root folder:** aponte para a pasta deste repositório (onde está a pasta `notebooks/`).
-# MAGIC    - **Source code / Paths:** aponte para **ESTE notebook** (`notebooks/track1_dados_aibi`)
+# MAGIC    - **Source code / Paths:** aponte para **ESTE notebook** (`notebooks/track1_dados_aibi/01_dados_aibi`)
 # MAGIC      e **remova** o arquivo `.py` de exemplo que veio por padrão.
 # MAGIC    - **Default catalog** e **Default schema:** escolha onde as tabelas serão criadas
 # MAGIC      (ex.: `workspace` / `sistema_academico` — os mesmos do `00_gerar_dados`).

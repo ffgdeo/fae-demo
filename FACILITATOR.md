@@ -10,7 +10,7 @@ está em `solutions/`.
 ## ✅ Antes do evento (faça o dry-run!)
 - [ ] **Crie uma conta Free Edition limpa** e rode as trilhas de ponta a ponta **antes da segunda**. Melhor seguro contra surpresas.
 - [ ] **Trilha 2 — teste o `yfinance`:** o `00_carregar_precos_acoes` baixa preços da internet. Confirme que o **egress externo** funciona no Free Edition; se estiver bloqueado, prepare um Plano B (amostra estática de preços). As outras duas tabelas da Trilha 2 são hardcoded — não dependem de internet.
-- [ ] **Trilha 1 / 3:** confirme que `00_gerar_dados` roda (Run all) e deixa os CSVs no Volume.
+- [ ] **Trilha 1 / 3:** confirme que `track1_dados_aibi/00_gerar_dados` roda (Run all) e deixa os CSVs no Volume (a Trilha 3 reusa esse mesmo setup).
 - [ ] Decida quais trilhas posicionar ao vivo. Sugestão: **Genie (Trilha 2)** como destaque + **Trilha 1** para quem curte engenharia de dados; **ML (Trilha 3)** fica como aprofundamento/casa.
 - [ ] Tenha o link curto do repo e o link do Free Edition num slide.
 - [ ] Decida: cada aluno usa a própria conta (recomendado) ou duplas.
@@ -48,7 +48,7 @@ Se o tempo apertar, priorize chegar nesses momentos — o resto é bônus.
 ## 🩹 Problemas comuns e soluções
 | Sintoma | Causa provável | Solução |
 |---|---|---|
-| `Table or view not found` na Trilha 1/3 | Não rodou o setup | Rode `00_gerar_dados` (Run all) primeiro |
+| `Table or view not found` na Trilha 1/3 | Não rodou o setup | Rode `track1_dados_aibi/00_gerar_dados` (Run all) primeiro |
 | Trilha 2: tabelas não existem no Genie | Não rodou os 3 setups | Rode `track2_genie/00`, `01`, `02` (Run all em cada) antes do `03` |
 | Trilha 2: `00` falha ao baixar preços | `yfinance` sem acesso à internet | Use o Plano B (amostra estática); as outras 2 tabelas independem de internet |
 | Erro de `dp`/`pipelines` ao rodar a Trilha 1 no notebook | Tentou Run All | Trilha 1 não roda assim — crie um **Pipeline** apontando pro notebook e rode por lá |
