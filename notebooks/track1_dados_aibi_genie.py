@@ -21,11 +21,17 @@
 # MAGIC
 # MAGIC ### ➡️ Passo 0 — crie o Pipeline ANTES de escrever ou rodar qualquer código:
 # MAGIC 1. Menu lateral → **Jobs & Pipelines** → **Create** → **ETL Pipeline** (Spark Declarative Pipeline).
-# MAGIC 2. **Source code:** aponte para **ESTE notebook** (`track1_dados_aibi_genie`).
-# MAGIC 3. **Destination:** escolha seu **Catalog** e **Target schema** (ex.: `workspace` / `sistema_academico`).
+# MAGIC 2. O editor abre com uma **pasta e um arquivo `.py` vazios** (um exemplo em branco). **Ignore** —
+# MAGIC    a gente vai apontar o pipeline para ESTE notebook em vez do arquivo de exemplo.
+# MAGIC 3. Abra **Settings** (⚙️ / *Pipeline settings*) e ajuste:
+# MAGIC    - **Root folder:** aponte para a pasta deste repositório (onde está a pasta `notebooks/`).
+# MAGIC    - **Source code / Paths:** aponte para **ESTE notebook** (`notebooks/track1_dados_aibi_genie`)
+# MAGIC      e **remova** o arquivo `.py` de exemplo que veio por padrão.
+# MAGIC    - **Default catalog** e **Default schema:** escolha onde as tabelas serão criadas
+# MAGIC      (ex.: `workspace` / `sistema_academico` — os mesmos do `00_gerar_dados`).
 # MAGIC 4. (Opcional) Se usou catálogo/schema diferente no `00_gerar_dados`, em **Advanced → Configuration**
 # MAGIC    adicione `fae.csv_base = /Volumes/<seu_catalogo>/<seu_schema>/staging/csvs`.
-# MAGIC 5. Clique em **Create**. Deixe a janela do Pipeline aberta.
+# MAGIC 5. **Salve** as settings. Deixe a janela do Pipeline aberta.
 # MAGIC
 # MAGIC ### Depois disso, o ciclo de trabalho é:
 # MAGIC - Você **edita/completa** as definições de tabela aqui (com ajuda do **Databricks Assistant**).

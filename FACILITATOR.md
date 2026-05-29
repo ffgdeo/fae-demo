@@ -34,10 +34,12 @@ Se o tempo apertar, priorize chegar nesses momentos — o resto é bônus.
   e seguirem no resto enquanto sobe. Há um **Plano B** no fim do notebook (embeddings em Delta +
   cosseno) caso o endpoint não fique ONLINE a tempo.
 - **AutoML** pode não estar disponível na UI → Trilha 2 usa scikit-learn + MLflow direto.
-- **Trilha 1 é um pipeline declarativo** — o notebook é a *definição*, não roda célula a célula.
-  Os alunos criam um **Pipeline** (Jobs & Pipelines → ETL Pipeline) apontando pro notebook,
-  escolhem catálogo/schema de destino e rodam por lá. Ingestão = **streaming tables** (Auto Loader);
-  Silver/Gold = **materialized views**.
+- **Trilha 1 é um pipeline declarativo** — o notebook é a *definição*, não roda célula a célula
+  (rodar interativo dá `cannot import name 'pipelines'` — esperado, não é limite do Free Edition).
+  Fluxo atual: **Jobs & Pipelines → Create → ETL Pipeline** abre com um `.py` de exemplo vazio;
+  os alunos vão em **Settings**, apontam **Root folder** + **Source code** para o notebook da trilha
+  (removendo o arquivo de exemplo) e ajustam **Default catalog/schema**. Ingestão = **streaming
+  tables** (Auto Loader); Silver/Gold = **materialized views**. Passo a passo no topo do notebook.
 - **`00_gerar_dados` não cria tabelas** — só deixa CSVs e PDFs no Volume (zona raw). Construir as
   tabelas é o exercício de cada trilha.
 
