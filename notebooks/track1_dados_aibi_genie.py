@@ -15,10 +15,13 @@
 
 # COMMAND ----------
 
-CATALOG = "workspace"
-SCHEMA  = "sistema_academico"
+dbutils.widgets.text("catalog", "workspace", "Catalog")
+dbutils.widgets.text("schema", "sistema_academico", "Schema")
+CATALOG = dbutils.widgets.get("catalog")
+SCHEMA  = dbutils.widgets.get("schema")
 CSV_BASE = f"/Volumes/{CATALOG}/{SCHEMA}/staging/csvs"
 spark.sql(f"USE {CATALOG}.{SCHEMA}")
+print(f"Usando {CATALOG}.{SCHEMA}")
 
 # COMMAND ----------
 

@@ -14,8 +14,8 @@
 # MAGIC > É idempotente — pode rodar de novo sem problemas. Depois, abra a trilha que você escolheu.
 # MAGIC
 # MAGIC > 🎛️ Catálogo e schema são definidos por **widgets** no topo (padrão: `workspace` /
-# MAGIC > `sistema_academico`). Os notebooks das trilhas assumem esses valores — só mude se souber
-# MAGIC > o que está fazendo (aí ajuste as trilhas também).
+# MAGIC > `sistema_academico`). Pode usar os valores que quiser — só garanta que os notebooks das
+# MAGIC > trilhas usem **exatamente o mesmo** catálogo/schema nos widgets deles.
 
 # COMMAND ----------
 

@@ -24,6 +24,10 @@ de uma universidade brasileira (alunos, matrículas, notas, disciplinas e provas
 | 2 · Machine Learning Clássico | `notebooks/track2_ml_classico` | Modelo de predição de reprovação com MLflow |
 | 3 · RAG | `notebooks/track3_rag` | Assistente de Q&A sobre provas (busca + LLM) |
 
+> 🎛️ Todos os notebooks têm widgets de **catalog** e **schema** no topo (padrão `workspace` /
+> `sistema_academico`). Use os valores que quiser — só mantenha o **mesmo** catálogo/schema em
+> todos os notebooks que você rodar.
+
 ## 🧞 Como prompar o Assistant
 
 Veja o guia **[PROMPTS.md](PROMPTS.md)** — a habilidade mais importante do dia.

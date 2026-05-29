@@ -17,10 +17,13 @@
 
 # COMMAND ----------
 
-CATALOG = "workspace"
-SCHEMA  = "sistema_academico"
+dbutils.widgets.text("catalog", "workspace", "Catalog")
+dbutils.widgets.text("schema", "sistema_academico", "Schema")
+CATALOG = dbutils.widgets.get("catalog")
+SCHEMA  = dbutils.widgets.get("schema")
 EXAMS   = f"/Volumes/{CATALOG}/{SCHEMA}/staging/exams/"
 spark.sql(f"USE {CATALOG}.{SCHEMA}")
+print(f"Usando {CATALOG}.{SCHEMA}")
 display(dbutils.fs.ls(EXAMS))
 
 # COMMAND ----------
@@ -33,28 +36,30 @@ display(dbutils.fs.ls(EXAMS))
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC CREATE OR REPLACE TABLE exam_chunks AS
-# MAGIC WITH parsed AS (
-# MAGIC   SELECT
-# MAGIC     regexp_extract(path, '([^/]+)\\.pdf$', 1) AS exam_filename,
-# MAGIC     path,
-# MAGIC     CAST(ai_parse_document(content, map('mode', 'TEXT')) AS STRING) AS raw_json
-# MAGIC   FROM read_files('/Volumes/workspace/sistema_academico/staging/exams/', format => 'binaryFile')
-# MAGIC ),
-# MAGIC extracted AS (
-# MAGIC   SELECT exam_filename, path,
-# MAGIC     concat_ws('\n\n', transform(
-# MAGIC       from_json(raw_json, 'document STRUCT<elements ARRAY<STRUCT<content STRING, type STRING>>>').document.elements,
-# MAGIC       x -> x.content
-# MAGIC     )) AS full_text
-# MAGIC   FROM parsed
-# MAGIC )
-# MAGIC SELECT monotonically_increasing_id() AS chunk_id, exam_filename, full_text AS chunk
-# MAGIC FROM extracted WHERE length(full_text) > 50;
-# MAGIC
-# MAGIC -- Vector Search (Delta Sync Index) exige Change Data Feed
-# MAGIC ALTER TABLE exam_chunks SET TBLPROPERTIES (delta.enableChangeDataFeed = true);
+spark.sql(f"""
+CREATE OR REPLACE TABLE exam_chunks AS
+WITH parsed AS (
+  SELECT
+    regexp_extract(path, '([^/]+)\\\\.pdf$', 1) AS exam_filename,
+    path,
+    CAST(ai_parse_document(content, map('mode', 'TEXT')) AS STRING) AS raw_json
+  FROM read_files('{EXAMS}', format => 'binaryFile')
+),
+extracted AS (
+  SELECT exam_filename, path,
+    concat_ws('\\n\\n', transform(
+      from_json(raw_json, 'document STRUCT<elements ARRAY<STRUCT<content STRING, type STRING>>>').document.elements,
+      x -> x.content
+    )) AS full_text
+  FROM parsed
+)
+SELECT monotonically_increasing_id() AS chunk_id, exam_filename, full_text AS chunk
+FROM extracted WHERE length(full_text) > 50
+""")
+
+# Vector Search (Delta Sync Index) exige Change Data Feed
+spark.sql("ALTER TABLE exam_chunks SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
+print("✅ exam_chunks criada")
 
 # COMMAND ----------
 
@@ -87,11 +92,11 @@ display(spark.sql("SELECT exam_filename, length(chunk) AS chars, left(chunk, 300
 # MAGIC
 # MAGIC **Prompt sugerido:**
 # MAGIC
-# MAGIC > _"Crie um Delta Sync Index chamado `workspace.sistema_academico.exam_chunks_vs_index` no
-# MAGIC > endpoint `exam-search`, a partir da tabela `workspace.sistema_academico.exam_chunks`.
-# MAGIC > Use `chunk_id` como primary key, faça o embedding gerenciado da coluna `chunk` com o
-# MAGIC > modelo `databricks-gte-large-en`, e configure pipeline_type TRIGGERED. Espere o índice
-# MAGIC > ficar pronto."_
+# MAGIC > _"No catálogo e schema atuais (variáveis `CATALOG` e `SCHEMA` já definidas neste notebook),
+# MAGIC > crie um Delta Sync Index `{CATALOG}.{SCHEMA}.exam_chunks_vs_index` no endpoint `exam-search`,
+# MAGIC > a partir da tabela `{CATALOG}.{SCHEMA}.exam_chunks`. Use `chunk_id` como primary key, faça o
+# MAGIC > embedding gerenciado da coluna `chunk` com o modelo `databricks-gte-large-en`, e configure
+# MAGIC > pipeline_type TRIGGERED. Espere o índice ficar pronto."_
 
 # COMMAND ----------
 
