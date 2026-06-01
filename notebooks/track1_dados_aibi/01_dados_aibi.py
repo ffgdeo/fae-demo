@@ -96,8 +96,8 @@ def bronze_matriculas():
 # MAGIC **Prompt para o Genie Code** (✨ ou `Cmd/Ctrl + I`):
 # MAGIC
 # MAGIC > _"Seguindo exatamente o mesmo padrão da função `bronze_matriculas` (decorator `dp.table`,
-# MAGIC > Auto Loader com cloudFiles lendo de `{CSV_BASE}/<nome>` e schemaLocation em
-# MAGIC > `{SCHEMA_BASE}/<nome>`), gere uma função `dp.table` para cada um destes CSVs: alunos,
+# MAGIC > Auto Loader com cloudFiles lendo de `{CSV_BASE}/<nome>`), 
+# MAGIC > gere uma função `dp.table` para cada um destes CSVs: alunos,
 # MAGIC > disciplinas, cursos, departamentos, professores."_
 
 # COMMAND ----------
